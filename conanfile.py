@@ -47,7 +47,7 @@ class ZziplibConan(ConanFile):
             if self.settings.arch == "x86":
                 # existing .sln works only for x86 builds
                 msbuild = MSBuild(self)
-                msbuild.build("{}/msvc8/zziplib.sln".format(self.folder_name))
+                msbuild.build("{}/msvc8/zziplib.sln".format(self.folder_name), platforms={"x86":"Win32"})
             else:
                 # install custom CMakeLists in source and use CMake
                 cmake = CMake(self)
