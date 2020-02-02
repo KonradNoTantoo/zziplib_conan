@@ -19,16 +19,21 @@ class ZziplibConan(ConanFile):
     default_options = "shared=True"
     generators = "cmake"
 
+
     def copy_file_to_source(self, name):
         file_content = tools.load(name)
         path_to_source = os.path.join(self.source_folder, self.folder_name, name)
         tools.save(path_to_source, file_content)
+        print("Copied", name, "=>", path_to_source)
+
 
     def requirements(self):
         self.requires("zlib/1.2.11@conan/stable")
 
+
     def config(self):
         del self.settings.compiler.libcxx
+
 
     def source(self):
         archive_name = "{}.tar.gz".format(self.folder_name)
@@ -65,6 +70,7 @@ class ZziplibConan(ConanFile):
                     env_build.configure(args=["--enable-static"])
                 env_build.make()
 
+
     def package(self):
         exported_headers = [
             "zzip/conf.h",
@@ -88,6 +94,7 @@ class ZziplibConan(ConanFile):
                 self.copy("*/lib{}.so".format(name), dst="lib", keep_path=False)
             else:
                 self.copy("*/lib{}.a".format(name), dst="lib", keep_path=False)
+
 
     def package_info(self):
         self.cpp_info.libs = ["zziplib"]
