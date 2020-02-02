@@ -68,9 +68,4 @@ set(zziplib_SOURCES
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}) # exported header files are not targeted directly
 
-if (ZZIP_DLL)
-  add_compile_definitions(ZZIP_DLL=1)
-  add_library(zziplib SHARED ${zziplib_SOURCES})
-else(ZZIP_DLL)
-  add_library(zziplib STATIC ${zziplib_SOURCES})
-endif(ZZIP_DLL)
+add_library(zziplib STATIC ${zziplib_SOURCES})

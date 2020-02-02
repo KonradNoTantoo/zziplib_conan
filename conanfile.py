@@ -27,12 +27,19 @@ class ZziplibConan(ConanFile):
         print("Copied", name, "=>", path_to_source)
 
 
+    def config_options(self):
+        # shared build is not available using VS
+        if self.settings.compiler == 'Visual Studio':
+            del self.options.shared
+
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+
     def requirements(self):
         self.requires("zlib/1.2.11@conan/stable")
-
-
-    def config(self):
-        del self.settings.compiler.libcxx
 
 
     def source(self):
@@ -56,8 +63,6 @@ class ZziplibConan(ConanFile):
             else:
                 # install custom CMakeLists in source and use CMake
                 cmake = CMake(self)
-                if self.options.shared:
-                    cmake.definitions["ZZIP_DLL"] = "ON"
                 cmake.configure(source_folder=self.folder_name)
                 cmake.build()
         else:
@@ -90,10 +95,13 @@ class ZziplibConan(ConanFile):
         for name in ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]:
             self.copy("*/{}lib.dll".format(name), dst="bin", keep_path=False)
             self.copy("*/{}lib.lib".format(name), dst="lib", keep_path=False)
-            if self.options.shared:
-                self.copy("*/lib{}.so".format(name), dst="lib", keep_path=False)
-            else:
-                self.copy("*/lib{}.a".format(name), dst="lib", keep_path=False)
+
+            if self.settings.compiler != 'Visual Studio':
+                # shared option deleted when using VS
+                if self.options.shared:
+                    self.copy("*/lib{}.so".format(name), dst="lib", keep_path=False)
+                else:
+                    self.copy("*/lib{}.a".format(name), dst="lib", keep_path=False)
 
 
     def package_info(self):
