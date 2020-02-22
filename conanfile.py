@@ -46,7 +46,7 @@ class ZziplibConan(ConanFile):
         archive_name = "{}.tar.gz".format(self.folder_name)
         tarball_path = "https://github.com/gdraheim/zziplib/archive/v{}.tar.gz".format(self.version)
         tools.get(tarball_path, filename=archive_name)
-        if self.settings.compiler == "Visual Studio" and self.settings.arch != "x86":
+        if self.settings.compiler == "Visual Studio":
             self.copy_file_to_source("CMakeLists.txt")
             self.copy_file_to_source("config.h.in.cmake")
         else:
@@ -56,15 +56,10 @@ class ZziplibConan(ConanFile):
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            if self.settings.arch == "x86":
-                # existing .sln works only for x86 builds
-                msbuild = MSBuild(self)
-                msbuild.build("{}/msvc8/zziplib.sln".format(self.folder_name), platforms={"x86":"Win32"})
-            else:
-                # install custom CMakeLists in source and use CMake
-                cmake = CMake(self)
-                cmake.configure(source_folder=self.folder_name)
-                cmake.build()
+            # install custom CMakeLists in source and use CMake
+            cmake = CMake(self)
+            cmake.configure(source_folder=self.folder_name)
+            cmake.build()
         else:
             build_target = "zzip{}-build".format(64 if self.settings.arch == "x86_64" else 32)
             with tools.chdir(self.folder_name):
