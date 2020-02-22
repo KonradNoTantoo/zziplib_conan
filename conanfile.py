@@ -90,7 +90,7 @@ class ZziplibConan(ConanFile):
         for header in exported_headers:
             self.copy(header, dst="include", src=self.folder_name, keep_path=True)
 
-        self.copy("zzip/_config.h", dst="include", keep_path=True)
+        self.copy("*/_config.h", dst="include/zzip", keep_path=False)
 
         for name in ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]:
             self.copy("*/{}lib.dll".format(name), dst="bin", keep_path=False)
@@ -105,4 +105,10 @@ class ZziplibConan(ConanFile):
 
 
     def package_info(self):
-        self.cpp_info.libs = ["zziplib"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.libs = ["zziplib"]
+        else:
+            for name in ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]:
+                self.cpp_info.libs = [
+                    "lib{}.{}".format(name, "so" if self.options.shared else "a")
+                ]
