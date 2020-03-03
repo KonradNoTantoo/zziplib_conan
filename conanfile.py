@@ -19,6 +19,8 @@ class ZziplibConan(ConanFile):
     default_options = "shared=True"
     generators = "cmake"
 
+    built_libs = ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]
+
 
     def copy_file_to_source(self, name):
         file_content = tools.load(name)
@@ -87,7 +89,7 @@ class ZziplibConan(ConanFile):
 
         self.copy("*/_config.h", dst="include/zzip", keep_path=False)
 
-        for name in ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]:
+        for name in self.built_libs:
             self.copy("*/{}lib.dll".format(name), dst="bin", keep_path=False)
             self.copy("*/{}lib.lib".format(name), dst="lib", keep_path=False)
 
@@ -103,7 +105,7 @@ class ZziplibConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["zziplib"]
         else:
-            for name in ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]:
-                self.cpp_info.libs = [
-                    "lib{}.{}".format(name, "so" if self.options.shared else "a")
-                ]
+            if self.options.shared:
+                self.cpp_info.libs = self.built_libs
+            else:
+                self.cpp_info.libs = [ "lib{}.a".format(name) for name in self.built_libs ]
