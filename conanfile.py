@@ -19,8 +19,6 @@ class ZziplibConan(ConanFile):
     default_options = "shared=True"
     generators = "cmake"
 
-    built_libs = ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]
-
 
     def copy_file_to_source(self, name):
         file_content = tools.load(name)
@@ -56,6 +54,15 @@ class ZziplibConan(ConanFile):
                 "SUBDIRS = zzip zzipwrap bins test docs", "SUBDIRS = zzip zzipwrap bins test", strict=False)
 
 
+    def _autotools_configure(self):
+        env_build = AutoToolsBuildEnvironment(self)
+        if self.options.shared:
+            env_build.configure(args=["--disable-static"])
+        else:
+            env_build.configure(args=["--enable-static"])
+        return env_build
+
+
     def build(self):
         if self.settings.compiler == "Visual Studio":
             # install custom CMakeLists in source and use CMake
@@ -65,47 +72,38 @@ class ZziplibConan(ConanFile):
         else:
             build_target = "zzip{}-build".format(64 if self.settings.arch == "x86_64" else 32)
             with tools.chdir(self.folder_name):
-                env_build = AutoToolsBuildEnvironment(self)
-                if self.options.shared:
-                    env_build.configure(args=["--disable-static"])
-                else:
-                    env_build.configure(args=["--enable-static"])
+                env_build = self._autotools_configure()
                 env_build.make()
 
 
     def package(self):
-        exported_headers = [
-            "zzip/conf.h",
-            "zzip/types.h",
-            "zzip/zzip.h",
-            "zzip/plugin.h",
-        ]
-
         if self.settings.compiler == "Visual Studio":
-            exported_headers.append("zzip/_msvc.h")
+            exported_headers = [
+                "zzip/conf.h",
+                "zzip/types.h",
+                "zzip/zzip.h",
+                "zzip/plugin.h",
+                "zzip/_msvc.h",
+                ]
 
-        for header in exported_headers:
-            self.copy(header, dst="include", src=self.folder_name, keep_path=True)
+            for header in exported_headers:
+                self.copy(header, dst="include", src=self.folder_name, keep_path=True)
 
-        self.copy("*/_config.h", dst="include/zzip", keep_path=False)
-
-        for name in self.built_libs:
-            self.copy("*/{}lib.dll".format(name), dst="bin", keep_path=False)
-            self.copy("*/{}lib.lib".format(name), dst="lib", keep_path=False)
-
-            if self.settings.compiler != 'Visual Studio':
-                # shared option deleted when using VS
-                if self.options.shared:
-                    self.copy("*/lib{}.so".format(name), dst="lib", keep_path=False)
-                else:
-                    self.copy("*/lib{}.a".format(name), dst="lib", keep_path=False)
+            self.copy("*/_config.h", dst="include/zzip", keep_path=False)
+            self.copy("*/zziplib.dll".format(name), dst="bin", keep_path=False)
+            self.copy("*/zziplib.lib".format(name), dst="lib", keep_path=False)
+        else:
+            with tools.chdir(self.folder_name):
+                env_build = self._autotools_configure()
+                env_build.install()
 
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["zziplib"]
         else:
+            built_libs = ["zzip", "zzipfseeko", "zzipmmapped", "zzipwrap"]
             if self.options.shared:
-                self.cpp_info.libs = self.built_libs
+                self.cpp_info.libs = built_libs
             else:
-                self.cpp_info.libs = [ "lib{}.a".format(name) for name in self.built_libs ]
+                self.cpp_info.libs = [ "lib{}.a".format(name) for name in built_libs ]
