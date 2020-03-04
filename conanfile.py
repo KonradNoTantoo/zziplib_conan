@@ -90,8 +90,8 @@ class ZziplibConan(ConanFile):
                 self.copy(header, dst="include", src=self.folder_name, keep_path=True)
 
             self.copy("*/_config.h", dst="include/zzip", keep_path=False)
-            self.copy("*/zziplib.dll".format(name), dst="bin", keep_path=False)
-            self.copy("*/zziplib.lib".format(name), dst="lib", keep_path=False)
+            self.copy("*/zziplib.dll", dst="bin", keep_path=False)
+            self.copy("*/zziplib.lib", dst="lib", keep_path=False)
         else:
             with tools.chdir(self.folder_name):
                 env_build = self._autotools_configure()
