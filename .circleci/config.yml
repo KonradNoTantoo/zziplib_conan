@@ -22,39 +22,13 @@ version: 2
 
 jobs:
 
-  gcc-49:
+  gcc-11:
       docker:
-        - image: conanio/gcc49
+        - image: conanio/gcc11
       environment:
-        - CONAN_GCC_VERSIONS: "4.9"
-      <<: *conan-steps
-
-  gcc-5:
-      docker:
-        - image: conanio/gcc5
-      environment:
-        - CONAN_GCC_VERSIONS: "5"
-      <<: *conan-steps
-
-  gcc-6:
-      docker:
-        - image: conanio/gcc6
-      environment:
-        - CONAN_GCC_VERSIONS: "6"
-      <<: *conan-steps
-
-  gcc-7:
-      docker:
-        - image: conanio/gcc7
-      environment:
-        - CONAN_GCC_VERSIONS: "7"
-      <<: *conan-steps
-
-  gcc-8:
-      docker:
-        - image: conanio/gcc8
-      environment:
-        - CONAN_GCC_VERSIONS: "8"
+        - CONAN_GCC_VERSIONS: "11"
+        - CONAN_REVISIONS_ENABLED: "1"
+        - CONAN_ARCHS: "x86_64"
       <<: *conan-steps
 
 
@@ -62,10 +36,6 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - gcc-49
-      - gcc-5
-      - gcc-6
-      - gcc-7
-      - gcc-8
+      - gcc-11
 
 
