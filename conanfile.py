@@ -39,7 +39,7 @@ class ZziplibConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("zlib/1.2.11@conan/stable")
+        self.requires("zlib/1.2.11")
 
 
     def source(self):
